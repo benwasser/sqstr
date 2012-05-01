@@ -1,0 +1,123 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<title>sqstr</title>
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			var socket = io.connect('/');
+			var direction = 38;
+			var counter = 0;
+			var endcounter = 20;
+			var history = [];
+			var targetx = Math.floor(Math.random()*(100));
+			var targety = Math.floor(Math.random()*(100));
+			
+			socket.on('map', function (mapdata, health, minx, miny, curx, cury) {
+				$('#map').html(mapdata);
+				var posx = curx;
+				var posy = cury;
+				var disx = (minx - posx) * (minx - posx);
+				var disy = (miny - posy) * (miny - posy);
+				var sentmsg = false;
+				if (minx != 1000) {
+					
+					$('#console').html('minx = ' + minx + ' posx = ' + posx);
+					if (minx > posx && disx >= disy) {
+						//move right?
+						$('#console').html('right: ' + miny + ' ' + minx + ' bot' + posx + ' ' + posy);
+						socket.emit('playermove', 39);
+						sentmsg = true;
+						history[history.length] = 39;
+					}
+					if (minx < posx && disx >= disy) {
+						$('#console').html('left: ' + miny + ' ' + minx + ' bot' + posx + ' ' + posy);
+						//move left?
+						socket.emit('playermove', 37);
+						sentmsg = true;
+						history[history.length] = 37;
+					}
+					if (miny < posy && disx <= disy) {
+						$('#console').html('up: ' + miny + ' ' + minx + ' bot' + posx + ' ' + posy);
+						//move up?
+						socket.emit('playermove', 38);
+						sentmsg = true;
+						history[history.length] = 38;
+					}
+					if (miny > posy && disx <= disy) {
+						$('#console').html('down: ' + miny + ' ' + minx + ' bot' + posx + ' ' + posy);
+						//move down?
+						socket.emit('playermove', 40);
+						sentmsg = true;
+						history[history.length] = 40;
+					}
+					if (history[10] == history[2] && history[9] != history[10] && history[2] == history[4]) {
+						socket.emit('playermove', (Math.floor(Math.random()*(4))) + 37);
+						sentmsg = true;
+						history[history.length] = 39;
+					}
+					if (history.length > 10) history = [];
+
+				} else {
+					//no enemies
+					disx = (targetx - posx) * (targetx - posx);
+					disy = (targety - posy) * (targety - posy);
+					if (targety < posy && disx <= disy) {
+						//move up?
+						$('#console').html('UP ' + targetx + ' ' + targety + ' posx = ' + posx + ' posy = ' + posy);
+						socket.emit('playermove', 38);
+						sentmsg = true;
+						history[history.length] = 38;
+					}
+					if (targety > posy && disx <= disy && sentmsg == false) {
+						//move down?
+						$('#console').html('DOWN ' + targetx + ' ' + targety + ' posx = ' + posx + ' posy = ' + posy);
+						socket.emit('playermove', 40);
+						sentmsg = true;
+						history[history.length] = 40;
+					}
+					if (targetx > posx && disx >= disy && sentmsg == false) {
+						//move right?
+						$('#console').html('RIGHT ' + targetx + ' ' + targety + ' posx = ' + posx + ' posy = ' + posy);
+						socket.emit('playermove', 39);
+						sentmsg = true;
+						history[history.length] = 39;
+					}
+					if (targetx < posx && disx >= disy && sentmsg == false) {
+						//move left?
+						$('#console').html('LEFT ' + targetx + ' ' + targety + ' posx = ' + posx + ' posy = ' + posy);
+						socket.emit('playermove', 37);
+						sentmsg = true;
+						history[history.length] = 37;
+					}
+
+					counter++;
+					if (counter > endcounter) {
+						counter = 0;
+						endcounter = Math.floor(Math.random()*(50));
+						targetx = Math.floor(Math.random()*(100));
+						targety = Math.floor(Math.random()*(100));
+					}
+				}
+
+				$('#health').html('<font color=\"#CCA300\">var</font> playerHealth = <font color=\"#8F2400\">' + health + '</font>\;');
+			});
+
+		});
+	</script>
+</head>
+<body style="font-family:Courier,monospace; font-size:14px; color:#D7F2A7; background-color:#102040; overflow:hidden; padding:0px; margin:0px;">
+<pre style="margin:0px; padding=0px;">
+<font color="#0052CC"><i>//a simple multiplayer game by ben wasser
+//made in node.js with socket.io and express</i></font>
+<div id="console"></div>
+<div id="map" style ="padding-left:90px;"><font color="#0052CC"><i>!!Loading and/or broken!!</i></font></div>};
+
+<div id="health"></div>
+
+</pre>
+</body>
+</html>

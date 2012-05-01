@@ -1,0 +1,86 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<title>sqstr</title>
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			var socket = io.connect('/');
+			var loggedin = false;
+			var linecount = '';
+			for (var i = 0; i < 100; i++) {
+				linecount = linecount + i + '<br />';
+			}
+			$('#linecounter').html(linecount);
+			socket.on('map', function (mapdata, health, x2, y2, x, y) {
+				//mapdata = mapdata.replace(/#/g, '<font color = \"gray\">#</font>');
+				$('#map').html(mapdata);
+				$('#health').html('console.<font color=\"#CCA300\">log</font>(\'playerHealth = \' + <font color=\"#339554\">\'' + health + '\'</font>)\;');
+			});
+			socket.on('updatestats', function (red, blue, users) {
+				$('#stats').html('<font color=\"#CCA300\">var</font> connectedPlayers = <font color=\"#CC0052\">' + users + '</font>\;<br /><font color=\"#CCA300\">var</font> redAtkBonus = <font color=\"#CC0052\">' + red + '</font>\;<br /><font color=\"#CCA300\">var</font> blueAtkBonus = <font color=\"#CC0052\">' + blue + '</font>\;<br />');
+			});
+			$('#joingame').click( function() {
+				if (loggedin == false) {
+					loggedin = true;
+					socket.emit('newplayer', prompt("Enter your name","player"));
+					$('#map').css('letter-spacing:7px;');
+				}
+				//$('.login').remove();
+			});
+			//TODO add a timer and variable to check if a key is held down every x ms
+			//and get rid of it when they keyup
+			//so that it's not sending socket messages constantly
+			$(document).keydown(function(e){
+			    if (e.keyCode == 37) { 
+				socket.emit('playermove', 37);
+			       return false;
+			    }
+			});
+			$(document).keydown(function(e){
+			    if (e.keyCode == 38) { 
+				socket.emit('playermove', 38);
+			       return false;
+			    }
+			});
+			$(document).keydown(function(e){
+			    if (e.keyCode == 39) { 
+				socket.emit('playermove', 39);
+			       return false;
+			    }
+			});
+			$(document).keydown(function(e){
+			    if (e.keyCode == 40) { 
+				socket.emit('playermove', 40);
+			       return false;
+			    }
+			});
+		});
+	</script>
+</head>
+<body style="font-family:Courier,monospace; font-size:14px; color:#D7F2A7; background-color:#102040; overflow:hidden; padding:0px; margin:0px;">
+<pre style="margin:0px; padding=0px;">
+<div id = "linecounter" style="float:left; text-align:right; background-color:#000052; color:#0052CC; padding-right:3px; margin-right:5px; width: 18px;"></div><font color="#0052CC"><i>//a simple multiplayer game by ben wasser
+//made in node.js with socket.io and express</i></font>
+
+<font color="#CCA300">var</font> gameTitle = <font color="#339554">'sqstr'</font>;
+
+<font color="#CCA300">var</font> userMapview = {<div id="map" style ="padding-left:50px;letter-spacing:4px;"><font color="#0052CC"><i>!!Loading and/or broken!!</i></font></div>};
+
+<div id="health"></div>
+<font color="#CCA300">function </font><a href = "#" style = "color:#FEF201;" onclick="$('#instructions').slideToggle('slow')">slideToggle</a>(){<div id = "instructions" style = "display:none">   <font color="#CCA300">var</font> instructions</a> = {
+      <font color="#339554">'goal'</font> : <font color="#339554">'boop or be booped'</font>,
+      <font color="#339554">'controls'</font> : [<font color="#339554">'arrow keys to move'</font>, <font color="#339554">'boop enemies to attack'</font>],
+      <font color="#339554">'tip'</font> : <font color="#339554">'the more area (X or O) your team has, the more damage you\'ll do'</font>,
+      <font color="#339554">'atkcalc'</font> : (playerPower * <font color="#CC0052">100</font>)<font color="#00FFCC">Math</font>.<font color="#CCA300">random</font>() + teamAtkBonus</font>
+   };</div>};
+
+<div id="stats"></div>
+
+
+</pre>
+</body>
+</html>
